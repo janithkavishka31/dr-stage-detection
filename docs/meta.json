@@ -1,0 +1,91 @@
+{
+  "arch": "efficientnet_b3",
+  "class_names": [
+    "No DR",
+    "Mild",
+    "Moderate",
+    "Severe",
+    "Proliferative"
+  ],
+  "referral": {
+    "threshold_grade": 2,
+    "refer": "Refer to ophthalmologist",
+    "routine": "Routine re-screening"
+  },
+  "model": {
+    "parts": [
+      "model.onnx.part0",
+      "model.onnx.part1",
+      "model.onnx.part2"
+    ],
+    "total_bytes": 42767136,
+    "sha256": "465cd44b59a3fc56cdad417097a0d7f8b86c762cde1c76e54be36aabe28bad68",
+    "input_name": "input",
+    "output_name": "probs",
+    "output_is_softmax": true,
+    "opset": 17
+  },
+  "preprocess": {
+    "stage1_size": 380,
+    "input_size": 300,
+    "crop_black_border": {
+      "tol": 7,
+      "min_pixels": 100
+    },
+    "stage1_resize": "INTER_AREA",
+    "ben_graham": {
+      "sigma_frac": 30.0,
+      "gain": 4.0,
+      "offset": 128
+    },
+    "clahe": {
+      "clip": 2.0,
+      "grid": 8,
+      "channel": "L of LAB"
+    },
+    "bilateral": {
+      "d": 5,
+      "sigma_color": 40,
+      "sigma_space": 40
+    },
+    "circle_mask": {
+      "frac": 0.97
+    },
+    "stage2_resize": "PIL bilinear (antialiased)",
+    "mean": [
+      0.48500001430511475,
+      0.4560000002384186,
+      0.4059999883174896
+    ],
+    "std": [
+      0.2290000021457672,
+      0.2240000069141388,
+      0.22499999403953552
+    ]
+  },
+  "tta_views": [
+    "identity",
+    "hflip",
+    "vflip",
+    "rot90",
+    "rot270"
+  ],
+  "test_metrics": {
+    "accuracy": 0.7672727272727272,
+    "precision_macro": 0.6215582532812022,
+    "recall_macro": 0.6548948661721279,
+    "f1_macro": 0.6242549554393632,
+    "precision_weighted": 0.7979769224989115,
+    "recall_weighted": 0.7672727272727272,
+    "f1_weighted": 0.7725972160591216,
+    "qwk": 0.8640690693892267,
+    "adjacent_accuracy": 0.9454545454545454,
+    "per_class_f1": [
+      0.9633699633699634,
+      0.5507246376811594,
+      0.6428571428571429,
+      0.38961038961038963,
+      0.5747126436781609
+    ]
+  }
+}

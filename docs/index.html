@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DR Stage Detection</title>
+  <meta name="description" content="In-browser diabetic retinopathy stage detection from retinal fundus photographs (research prototype).">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.min.js"></script>
+  <script defer src="pipeline.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <circle cx="16" cy="16" r="6" fill="currentColor"/>
+          <circle cx="21" cy="12" r="2" fill="var(--surface)"/>
+        </svg>
+        <div>
+          <h1>Diabetic Retinopathy Stage Detection</h1>
+          <p class="sub">Fundus image grading · runs entirely in your browser</p>
+        </div>
+      </div>
+      <div id="status" class="status" data-kind="loading" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="status-text">Loading…</span>
+      </div>
+    </div>
+    <div id="load-progress" class="load-progress" hidden><span></span></div>
+  </header>
+
+  <main class="wrap">
+    <div class="disclaimer" role="note">
+      <strong>Research prototype, not a diagnostic device.</strong>
+      Outputs are for demonstration only and must be reviewed by a qualified clinician.
+      Images are processed locally and never leave your device.
+    </div>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="upload-h">
+        <h2 id="upload-h">1 · Upload fundus photograph</h2>
+        <label id="dropzone" class="dropzone disabled" for="file-input">
+          <input id="file-input" type="file" accept="image/*" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="dz-main">Click to choose or drop an image</span>
+          <span class="dz-sub">JPEG or PNG retinal fundus photograph</span>
+        </label>
+
+        <div id="previews" class="previews" hidden>
+          <figure>
+            <img id="preview-original" alt="Uploaded fundus image">
+            <figcaption>Original</figcaption>
+          </figure>
+          <figure>
+            <canvas id="preview-processed" aria-label="Preprocessed fundus image"></canvas>
+            <figcaption>Preprocessed (crop · Ben Graham · CLAHE · denoise · mask)</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="results" class="card results" aria-labelledby="results-h" aria-live="polite">
+        <h2 id="results-h">2 · Result</h2>
+        <p id="analysis-status" class="analysis-status"></p>
+        <p id="error" class="error" hidden></p>
+
+        <div id="verdict" class="verdict" hidden>
+          <div class="verdict-top">
+            <div>
+              <div class="verdict-label">Predicted stage</div>
+              <div id="verdict-stage" class="verdict-stage"></div>
+              <div id="verdict-grade" class="verdict-grade"></div>
+            </div>
+            <div class="confidence">
+              <div id="verdict-confidence" class="confidence-value"></div>
+              <div class="verdict-label">confidence</div>
+            </div>
+          </div>
+          <p id="verdict-desc" class="verdict-desc"></p>
+          <ol id="scale" class="scale" aria-label="Severity scale">
+            <li class="sev-0"><span>0</span></li>
+            <li class="sev-1"><span>1</span></li>
+            <li class="sev-2"><span>2</span></li>
+            <li class="sev-3"><span>3</span></li>
+            <li class="sev-4"><span>4</span></li>
+          </ol>
+          <div id="referral" class="referral"></div>
+        </div>
+
+        <h3>Probability by stage</h3>
+        <ul id="bars" class="bars"></ul>
+        <p id="result-meta" class="result-meta"></p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p id="model-info"></p>
+    <p>Preprocessing and test-time augmentation (5 views) replicate the training pipeline.
+      Inference: ONNX Runtime Web · Image processing: OpenCV.js 4.13.</p>
+  </footer>
+</body>
+</html>
